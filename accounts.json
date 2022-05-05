@@ -1,0 +1,26 @@
+{
+    "data": {
+        "users": [
+            {
+                "name": "John Doe",
+                "account_number": "JD0001",
+                "phone": "123-345-4567",
+                "email": "jd@gmail.com",
+                "balance": 2000,
+                "password": 1115,
+                "transaction_history":{},
+                "balance_history":{}
+            },
+            {
+                "name": "Jane Doe",
+                "account_number": "JD0002",
+                "phone": "343-345-4567",
+                "email": "jdoe@gmail.com",
+                "balance": 4000,
+                "password": 1112,
+                "transaction_history":{},
+                "balance_history":{}
+            }
+        ]
+    }
+}
