@@ -1,5 +1,7 @@
+from asyncio.windows_events import NULL
 from random import randint
 import datetime 
+import pandas as pd
 
 from pymongo import MongoClient
 client = MongoClient('localhost', 27017)
@@ -7,8 +9,7 @@ db_users = client.bank_app
 users = db_users.u
 
 class Bank():
-    day=1
-    month=1
+    start_date="01/01/2022"
   
     trans=""
 
@@ -22,8 +23,7 @@ class Bank():
         self.transaction_history = transaction_history
         self.balance_history=balance_history
 
-    def create_new_date(self):
-        self.transaction_history
+    
     
     def show_account_details(self):
         for date in self.transaction_history:
@@ -38,18 +38,26 @@ class Bank():
         print("Transaction history: ", self.trans)
 
     def deposit(self, amount):
-        self.day+=2
+        if len(self.transaction_history) == 0:
+            self.start_date = pd.to_datetime("01/01/2022")
+        else:
+            self.start_date = pd.to_datetime(list(self.transaction_history.keys())[-1]) +  pd.DateOffset(days=5)
+
         self.amount=amount
         self.balance +=self.amount
-        self.transaction_history[(datetime.datetime(2022, self.month, self.day)).strftime("%x")] = self.amount
-        self.balance_history[(datetime.datetime(2022, self.month, self.day)).strftime("%x")] = self.balance
+        self.transaction_history[datetime.datetime.strftime(self.start_date, "%m/%d/%y")] = self.amount
+        self.balance_history[datetime.datetime.strftime(self.start_date, "%m/%d/%y")] = self.balance
         print("Account balance has been updated  : $", self.balance)
         print(self.transaction_history)
 
 
     def withdraw(self, amount):
         self.amount=amount
-        self.day+=1
+        
+        if len(self.transaction_history) == 0:
+            self.start_date = pd.to_datetime("01/01/2022")
+        else:
+            self.start_date = pd.to_datetime(list(self.transaction_history.keys())[-1]) +  pd.DateOffset(days=5)
 
         if self.amount > self.balance:
             print("Insufisient balance. Available balance is $", self.balance)
@@ -57,8 +65,8 @@ class Bank():
             self.balance -= self.amount
             print("Account balance has been updated  : $", self.balance )
        
-        self.transaction_history[(datetime.datetime(2022, self.month, self.day)).strftime("%x")] = int("-" + str(self.amount))
-        self.balance_history[(datetime.datetime(2022, self.month, self.day)).strftime("%x")] = self.balance
+        self.transaction_history[datetime.datetime.strftime(self.start_date, "%m/%d/%y")] = "-" + str(self.amount)
+        self.balance_history[datetime.datetime.strftime(self.start_date, "%m/%d/%y")] = self.balance
         print(self.transaction_history)
 
     def view_balance(self):

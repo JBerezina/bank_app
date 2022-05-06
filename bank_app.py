@@ -1,3 +1,4 @@
+from asyncio.windows_events import NULL
 import bank
 import json
 import re
@@ -20,13 +21,12 @@ def get_all_accounts():
 def add_accounts_to_mongo_from_json():
     accounts=get_all_accounts()
     for user in accounts['data']['users']:
-        print(user['name'])
         if not users.find_one({'name':user['name']}):
             print(user)
             users.insert_one(user)
 
 
-def create_new_account(email, phone, full_name, password, balance):
+def create_new_account(full_name, phone, email, password, balance):
     a=""
     for name in full_name.split(" "):
         a +=name[0]
@@ -53,9 +53,7 @@ def create_new_account(email, phone, full_name, password, balance):
 
 def delete_account(email):
     users.delete_one({'email': email})
-
     print("YOUR ACCOUNT DELETED")
-
   
 #VALIDATIONS
 def check_if_email_and_password_exist(email, password):
@@ -101,8 +99,8 @@ def validate_email_and_phone(item):
             else:
                 break
     return inputed_item
-
 #-----------------------------------------------
+
 def main():
     add_accounts_to_mongo_from_json()
     print("*"*30)
@@ -123,7 +121,7 @@ def main():
             
             if check_if_email_and_password_exist(email, password):
                 u=users.find_one({"email": email})
-                new_user = bank.Bank(u['name'], u['account_number'], u['phone'], u['email'], u['balance'], u['password'], u['transaction_history'], u['balance_history'])
+                new_user = bank.Bank(u['name'], u['phone'], u['email'], u['account_number'],  u['balance'], u['password'], u['transaction_history'], u['balance_history'])
                 while True:
                     print("*"*30)
                   
@@ -141,13 +139,25 @@ def main():
                     choice = int(input("Select your option: "))
                     print("*"*30)
                     if choice == 1:
-                        amount=int(input("How much do you want to deposit: "))
-                        new_user.deposit(amount)
+                        while True:
+                            try:
+                                amount=int(input("How much do you want to deposit: "))
+                            except ValueError:
+                                print("TYPE CORRECT AMOUNT")
+                            else:
+                                new_user.deposit(amount)
+                                break
                         
                     elif choice == 2:
-                        amount=int(input("How much do you want to withdraw: "))
-                        print("\n")
-                        new_user.withdraw(amount)
+                          while True:
+                            try:
+                                amount=int(input("How much do you want to withdraw: "))
+                            except ValueError:
+                                print("TYPE CORRECT AMOUNT")
+                            else:
+                                new_user.withdraw(amount)
+                                break
+                        
                     elif choice ==3:
                         print("\n")
                         new_user.view_balance()
@@ -180,13 +190,14 @@ def main():
             balance = int(input("Please enter initial deposit: "))
             
 
-            create_new_account(email, phone, full_name, password, balance)
-            
+            create_new_account(full_name, phone, email, password, balance)
             print("*"*30)
             print("Please SIGNIN again to access your account")
             
         elif client_exist == "q":
             break
+        else:
+            print("Make sure to input yes or no")
         
 
 main()
