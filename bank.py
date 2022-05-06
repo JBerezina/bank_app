@@ -3,6 +3,7 @@ from random import randint
 import datetime 
 import pandas as pd
 
+
 from pymongo import MongoClient
 client = MongoClient('localhost', 27017)
 db_users = client.bank_app
@@ -10,7 +11,6 @@ users = db_users.u
 
 class Bank():
     start_date="01/01/2022"
-  
     trans=""
 
     def __init__(self, name, phone, email, account_number, balance, password, transaction_history, balance_history):
@@ -22,12 +22,10 @@ class Bank():
         self.password= password
         self.transaction_history = transaction_history
         self.balance_history=balance_history
-
-    
     
     def show_account_details(self):
         for date in self.transaction_history:
-            self.trans +=  "\n"+str(date) + ": " + str(self.transaction_history[date])
+            self.trans +=  "\n              "+str(date) + ": " + str(self.transaction_history[date])
          
         print("Name : ", self.name)
         print("Account Number : ", self.account_number)
@@ -38,6 +36,8 @@ class Bank():
         print("Transaction history: ", self.trans)
 
     def deposit(self, amount):
+
+        #CREATE DICTIONARY FOR TRANSACTION AND BALANCE AND SET DATE AS KEY AND AMOUNT AS VALUE
         if len(self.transaction_history) == 0:
             self.start_date = pd.to_datetime("01/01/2022")
         else:
@@ -48,7 +48,6 @@ class Bank():
         self.transaction_history[datetime.datetime.strftime(self.start_date, "%m/%d/%y")] = self.amount
         self.balance_history[datetime.datetime.strftime(self.start_date, "%m/%d/%y")] = self.balance
         print("Account balance has been updated  : $", self.balance)
-        print(self.transaction_history)
 
 
     def withdraw(self, amount):
@@ -65,9 +64,8 @@ class Bank():
             self.balance -= self.amount
             print("Account balance has been updated  : $", self.balance )
        
-        self.transaction_history[datetime.datetime.strftime(self.start_date, "%m/%d/%y")] = "-" + str(self.amount)
+        self.transaction_history[datetime.datetime.strftime(self.start_date, "%m/%d/%y")] = int("-" + str(self.amount))
         self.balance_history[datetime.datetime.strftime(self.start_date, "%m/%d/%y")] = self.balance
-        print(self.transaction_history)
 
     def view_balance(self):
         print("Account balance is :", self.balance)

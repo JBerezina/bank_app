@@ -1,4 +1,3 @@
-from asyncio.windows_events import NULL
 import bank
 import json
 import re
@@ -6,6 +5,7 @@ import pymongo
 from random import randint
 from pymongo import MongoClient
 
+#CONNECT TO DATABASE
 client = MongoClient('localhost', 27017)
 db_users = client.bank_app
 users = db_users.u
@@ -18,6 +18,7 @@ def get_all_accounts():
         json_file.close()
         return accounts
 
+#ADD USERS FROM JSONE TO MONGO
 def add_accounts_to_mongo_from_json():
     accounts=get_all_accounts()
     for user in accounts['data']['users']:
@@ -25,7 +26,7 @@ def add_accounts_to_mongo_from_json():
             print(user)
             users.insert_one(user)
 
-
+#CREATE NEW ACCOUNT
 def create_new_account(full_name, phone, email, password, balance):
     a=""
     for name in full_name.split(" "):
@@ -36,21 +37,22 @@ def create_new_account(full_name, phone, email, password, balance):
         print("This email exist")
     if users.find_one({'phone':  phone}):
         print("This phone exist")
+    else: 
+        new_user={
+            "name": full_name,
+            "account_number": account_number,
+            "phone": phone,
+            "email": email,
+            "balance": balance,
+            "password": password,
+            "transaction_history": {},
+            "balance_history" : {}
+        }
 
-    new_user={
-        "name": full_name,
-        "account_number": account_number,
-        "phone": phone,
-        "email": email,
-        "balance": balance,
-        "password": password,
-        "transaction_history": {},
-        "balance_history" : {}
-    }
+        users.insert_one(new_user)
+        print("ACCOUNT CREATED")
 
-    users.insert_one(new_user)
-    print("ACCOUNT CREATED")
-
+#DELETE ACCOUNT FROM DB
 def delete_account(email):
     users.delete_one({'email': email})
     print("YOUR ACCOUNT DELETED")
@@ -66,6 +68,7 @@ def check_if_email_and_password_exist(email, password):
     except BaseException:
         print("Sorry, cannot find connection to database!")
 
+#VALIDATE RIGHT INPUT OF EMAIL AND PHONE
 def validate_item(object_to_validate, regex):
    
     if re.fullmatch(regex, object_to_validate):
@@ -76,7 +79,6 @@ def validate_item(object_to_validate, regex):
 def validate_email_and_phone(item):
     validation = False
     inputed_item=""
-
 
     while not validation:
         if item=="email":
@@ -136,45 +138,50 @@ def main():
 
                     print("6.Quit")
 
-                    choice = int(input("Select your option: "))
-                    print("*"*30)
-                    if choice == 1:
-                        while True:
-                            try:
-                                amount=int(input("How much do you want to deposit: "))
-                            except ValueError:
-                                print("TYPE CORRECT AMOUNT")
-                            else:
-                                new_user.deposit(amount)
-                                break
-                        
-                    elif choice == 2:
-                          while True:
-                            try:
-                                amount=int(input("How much do you want to withdraw: "))
-                            except ValueError:
-                                print("TYPE CORRECT AMOUNT")
-                            else:
-                                new_user.withdraw(amount)
-                                break
-                        
-                    elif choice ==3:
-                        print("\n")
-                        new_user.view_balance()
-                    elif choice == 4:
-                        new_user.show_account_details() 
-                    elif choice == 5:
-                        delete_account(email)
-                        break
-                    elif choice == 6:
-                        def update_database():
-                            users.update_many({'name': new_user.name}, 
-                            { '$set' :{"balance": new_user.balance, "transaction_history": new_user.transaction_history, "balance_history" : new_user.balance_history}})
-                            print("Goodbuy")
-                        update_database()
-                        break
-                    else:
-                        print("Please choose given option")
+                    
+                    try:
+                        choice = int(input("Select your option: "))
+                    except ValueError:
+                        print("MAKE SURE TO PIK GIVEN OPTIONS")
+                    else: 
+                        print("*"*30)
+                        if choice == 1:
+                            while True:
+                                try:
+                                    amount=int(input("How much do you want to deposit: "))
+                                except ValueError:
+                                    print("TYPE CORRECT AMOUNT")
+                                else:
+                                    new_user.deposit(amount)
+                                    break
+                            
+                        elif choice == 2:
+                            while True:
+                                try:
+                                    amount=int(input("How much do you want to withdraw: "))
+                                except ValueError:
+                                    print("TYPE CORRECT AMOUNT")
+                                else:
+                                    new_user.withdraw(amount)
+                                    break
+                            
+                        elif choice ==3:
+                            print("\n")
+                            new_user.view_balance()
+                        elif choice == 4:
+                            new_user.show_account_details() 
+                        elif choice == 5:
+                            delete_account(email)
+                            break
+                        elif choice == 6:
+                            def update_database():
+                                users.update_many({'name': new_user.name}, 
+                                { '$set' :{"balance": new_user.balance, "transaction_history": new_user.transaction_history, "balance_history" : new_user.balance_history}})
+                                print("Goodbuy")
+                            update_database()
+                            break
+                        else:
+                            print("Please choose given option")
 
         elif client_exist == "no":
             print("LETS CREATE ACCOUNT")
@@ -199,5 +206,4 @@ def main():
         else:
             print("Make sure to input yes or no")
         
-
 main()
